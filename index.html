@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+    
+  </head>
+  <body>
+    from: <select id="from">
+            <option value="Tom">Tom</option>
+            <option value="Jerry">Jerry</option>
+          </select>
+    To: <select id="to">
+            <option value="Jerry">Jerry</option>
+            <option value="Tom">Tom</option>
+        </select>
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m"  autocomplete="off"/><button >Send</button>
+    </form>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      var socket = io();
+      socket.emit('sign up',$('#from').val());
+      $('#from').on('change',function(){
+        console.log('sign up from '+ $('#from').val());
+        socket.emit('sign up',$('#from').val());
+      })
+
+      $('form').submit(function(){
+        var msg={
+          from:$('#from').val(),
+          to:$('#to').val(),
+          txt:$('#m').val(),
+          time:new Date()
+        };
+        console.log('send message: ' + msg.txt + ' from ' + msg.from + ' to ' + msg.to);
+        $('#messages').append($('<li>').text($('#m').val() + ' by me @ '+ new Date()));
+        socket.emit('chat message', msg);
+        $('#m').val('');
+        return false;
+      });
+      socket.on('chat message', function(msg){
+        console.log('Receive message: ' + msg.txt + ' from ' + msg.from + ' to ' + msg.to);
+        if(msg.to==$('#from').val()) {
+          $('#messages').append($('<li>').text(msg.txt + ' by ' + msg.from + ' @: ' +msg.time));
+        }
+      });
+    </script>
+  </body>
+</html>
